@@ -7,24 +7,6 @@ using Antilatency.DeviceNetwork;
 using Antilatency.HardwareExtensionInterface;
 using Antilatency.HardwareExtensionInterface.Interop;
 
-
-
-
-// 
-/*class Program
-{
-    static void Main(string[] args)
-    {
-        var example = new Example();
-        while (true)
-        {
-
-
-        }
-    }
-}*/
-
-
 class Example
 {
     private Antilatency.DeviceNetwork.ILibrary _adnLibrary;
@@ -40,7 +22,7 @@ class Example
     private Antilatency.HardwareExtensionInterface.IOutputPin outputPin6;
     private Antilatency.HardwareExtensionInterface.ILibrary _library;
 
-    protected virtual void Awake()
+    /*protected virtual void Awake()
     {
         Init();
     }
@@ -53,7 +35,7 @@ class Example
             return;
         }
 
-        _library = Antilatency.HardwareExtensionInterface.Library.load();
+        
 
 
         if (_library == null)
@@ -61,12 +43,12 @@ class Example
             Debug.LogError("Failed to create hardware extension interface library");
             return;
         }
-    }
+    }*/
 
     public Example()
     {
         _adnLibrary = Antilatency.DeviceNetwork.Library.load();
-        
+        _library = Antilatency.HardwareExtensionInterface.Library.load();
 
         _nodeHandle = WaitForNode();
         _cotaskConstructor = _library.getCotaskConstructor();

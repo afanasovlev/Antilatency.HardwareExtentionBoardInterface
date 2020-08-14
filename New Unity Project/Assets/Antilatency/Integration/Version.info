@@ -1,0 +1,84 @@
+{
+  "Sdk": {
+    "Name": "AntilatencySDK",
+    "Category": "branches",
+    "Version": "2.1.0-rc",
+    "Revision": "301"
+  },
+  "Dependencies": [
+    {
+      "Name": "AntilatencyApiGenerator",
+      "Category": "trunk",
+      "Version": null,
+      "Revision": "442"
+    },
+    {
+      "Name": "AntilatencyLibraryLoader",
+      "Category": "trunk",
+      "Version": null,
+      "Revision": "17"
+    },
+    {
+      "Name": "AntilatencyLicense",
+      "Category": null,
+      "Version": null,
+      "Revision": "12"
+    },
+    {
+      "Name": "CiBuildScripts",
+      "Category": "trunk",
+      "Version": null,
+      "Revision": "71"
+    }
+  ],
+  "BinaryDependencies": [
+    {
+      "Name": "AltTracking",
+      "Category": "tags",
+      "Version": "4.0.2",
+      "Revision": "15963"
+    },
+    {
+      "Name": "BracerCotask",
+      "Category": "tags",
+      "Version": "2.0.1",
+      "Revision": "15963"
+    },
+    {
+      "Name": "AntilatencyDeviceNetwork",
+      "Category": "tags",
+      "Version": "7.5.1",
+      "Revision": "15963"
+    },
+    {
+      "Name": "AntilatencyHardwareExtensionInterface",
+      "Category": "tags",
+      "Version": "2.0.1",
+      "Revision": "15963"
+    },
+    {
+      "Name": "AntilatencyRadioMetrics",
+      "Category": "tags",
+      "Version": "1.0.1",
+      "Revision": "15963"
+    },
+    {
+      "Name": "AntilatencyStorageClient",
+      "Category": "tags",
+      "Version": "3.0.3",
+      "Revision": "15963"
+    },
+    {
+      "Name": "AntilatencyTrackingAlignment",
+      "Category": "tags",
+      "Version": "1.0.2",
+      "Revision": "15963"
+    },
+    {
+      "Name": "UsbServiceInterfaces",
+      "Category": "tags",
+      "Version": "1.0.1",
+      "Revision": "15963"
+    }
+  ]
+}

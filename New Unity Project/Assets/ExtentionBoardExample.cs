@@ -47,7 +47,7 @@ public class ExtentionBoardExample : MonoBehaviour
     void Update()
         {
 
-        Console.Write("hi from awake");
+       
         inetwork = GetNativeNetwork();
 
         if (inetwork == null)

@@ -28,7 +28,7 @@ public class ExtentionBoardExample : MonoBehaviour
 
     void Update()
         {
-
+        dLibrary = Antilatency.DeviceNetwork.Library.load();
         inetwork = dLibrary.createNetwork(new[] { new UsbDeviceType { vid = UsbVendorId.Antilatency, pid = 0x0000 } });
 
         if (inetwork == null)
@@ -36,7 +36,7 @@ public class ExtentionBoardExample : MonoBehaviour
             Debug.LogError("Network is null!!!!");
             return;
         }
-        dLibrary = Antilatency.DeviceNetwork.Library.load();
+       
         library = Antilatency.HardwareExtensionInterface.Library.load();
 
         if (library == null)
@@ -44,8 +44,14 @@ public class ExtentionBoardExample : MonoBehaviour
             Debug.LogError("Failed to create hardware extension interface library");
             return;
         }
+        if (dLibrary == null)
+        {
+            Debug.LogError("Failed to create Device network library");
+            return;
+        }
 
         nodeHandle = new NodeHandle();
+        
         cotaskConstructor = library.getCotaskConstructor();
 
 
@@ -63,26 +69,26 @@ public class ExtentionBoardExample : MonoBehaviour
                    
             if (Input.GetKey(KeyCode.UpArrow))
             {
-            obj.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+                obj.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
             oPins[1].setState(PinState.High);
             oPins[3].setState(PinState.High);
 
         }
             if (Input.GetKey(KeyCode.DownArrow))
             {
-            obj.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
+                obj.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
             oPins[0].setState(PinState.High);
             oPins[2].setState(PinState.High);
         }
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-            obj.transform.Rotate(Vector3.up * -turnSpeed * Time.deltaTime);
+                obj.transform.Rotate(Vector3.up * -turnSpeed * Time.deltaTime);
             oPins[1].setState(PinState.High);
             oPins[2].setState(PinState.High);
         }
             if (Input.GetKey(KeyCode.RightArrow))
             {
-            obj.transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime);
+                obj.transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime);
             oPins[0].setState(PinState.High);
             oPins[3].setState(PinState.High);
         }

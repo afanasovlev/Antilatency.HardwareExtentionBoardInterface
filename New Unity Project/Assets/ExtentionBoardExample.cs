@@ -4,66 +4,19 @@ using Antilatency.HardwareExtensionInterface.Interop;
 using Antilatency.HardwareExtensionInterface;
 using Antilatency.DeviceNetwork;
 
+using UnityEngine.Events;
+
 
 
 namespace Antilatency.Integration
 {
     public class ExtentionBoardExample : MonoBehaviour
     {
-
-        public GameObject obj;
-        public float range = 5f;
-        public static Board eBoard = new Board();
-
-        public Antilatency.HardwareExtensionInterface.IOutputPin[] oPins = new IOutputPin[4];
-    
-
-        void Update()
-        {
-
-            float moveSpeed = 3f;
-            float turnSpeed = 100f;
-
-            if (Input.GetKey(KeyCode.UpArrow))
-            {
-                eBoard.cotask.run();
-                obj.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
-                eBoard.outputPin2.setState(PinState.High);
-                eBoard.outputPin6.setState(PinState.High);
-
-            }
-            if (Input.GetKey(KeyCode.DownArrow))
-            {
-                eBoard.cotask.run();
-                obj.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
-                eBoard.outputPin1.setState(PinState.High);
-                eBoard.outputPin5.setState(PinState.High);
-            }
-            if (Input.GetKey(KeyCode.LeftArrow))
-            {
-                eBoard.cotask.run();
-                obj.transform.Rotate(Vector3.up * -turnSpeed * Time.deltaTime);
-                eBoard.outputPin2.setState(PinState.High);
-                eBoard.outputPin5.setState(PinState.High);
-            }
-            if (Input.GetKey(KeyCode.RightArrow))
-            {
-                eBoard.cotask.run();
-                obj.transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime);
-                eBoard.outputPin1.setState(PinState.High);
-                eBoard.outputPin6.setState(PinState.High);
-            }
-        }
-
-
-
-    }
-    public class Board
-    {
-        public Antilatency.Integration.DeviceNetwork Network;
+        
+        public DeviceNetwork Network;
         public Antilatency.DeviceNetwork.ILibrary dLibrary;
         public Antilatency.DeviceNetwork.INetwork inetwork;
-        public Antilatency.DeviceNetwork.NodeHandle nodeHandle;
+        public Antilatency.DeviceNetwork.NodeHandle node;
 
         public Antilatency.HardwareExtensionInterface.ILibrary library;
         public Antilatency.HardwareExtensionInterface.ICotask cotask;
@@ -73,10 +26,23 @@ namespace Antilatency.Integration
         public Antilatency.HardwareExtensionInterface.IOutputPin outputPin2;
         public Antilatency.HardwareExtensionInterface.IOutputPin outputPin5;
         public Antilatency.HardwareExtensionInterface.IOutputPin outputPin6;
+        public GameObject obj;
+        public float range = 5f;
 
-        public Board()
+        private void Awake()
         {
-            Console.WriteLine("im created");
+            init();
+        }
+
+        private void init()
+        {
+            node = new NodeHandle(); 
+
+            if (Network == null)
+            {
+                Debug.LogError("Network is null, from Init");
+                return;
+            }
             dLibrary = Antilatency.DeviceNetwork.Library.load();
             library = Antilatency.HardwareExtensionInterface.Library.load();
 
@@ -92,24 +58,55 @@ namespace Antilatency.Integration
 
             cotaskConstructor = library.getCotaskConstructor();
 
+          
             var nw = GetNativeNetwork();
-            if (inetwork == null)
-            {
-                Debug.LogError("Network is null!!!!");
-                return;
-            }
+            cotask = cotaskConstructor.startTask(nw, new NodeHandle()); 
 
-            nodeHandle = new NodeHandle();
+        }
 
-            cotask = cotaskConstructor.startTask(nw, nodeHandle);
 
+        private void Start()
+        {
+       
             outputPin1 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO1, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
             outputPin2 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO2, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
             outputPin5 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO5, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
             outputPin6 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO6, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
 
+            cotask.run();
         }
+        void Update()
+        {
 
+            float moveSpeed = 3f;
+            float turnSpeed = 100f;
+
+            if (Input.GetKey(KeyCode.UpArrow))
+            {
+                obj.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+                outputPin2.setState(PinState.High);
+                outputPin6.setState(PinState.High);
+
+            }
+            if (Input.GetKey(KeyCode.DownArrow))
+            {
+                obj.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
+                outputPin1.setState(PinState.High);
+                outputPin5.setState(PinState.High);
+            }
+            if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                obj.transform.Rotate(Vector3.up * -turnSpeed * Time.deltaTime);
+                outputPin2.setState(PinState.High);
+                outputPin5.setState(PinState.High);
+            }
+            if (Input.GetKey(KeyCode.RightArrow))
+            {
+                obj.transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime);
+                outputPin1.setState(PinState.High);
+                outputPin6.setState(PinState.High);
+            }
+        }
         public INetwork GetNativeNetwork()
         {
             if (Network == null)
@@ -127,4 +124,5 @@ namespace Antilatency.Integration
             return Network.NativeNetwork;
         }
     }
+    
 }

@@ -5,8 +5,7 @@ using Antilatency.HardwareExtensionInterface;
 using Antilatency.DeviceNetwork;
 
 using UnityEngine.Events;
-
-
+using System.Linq;
 
 namespace Antilatency.Integration
 {
@@ -28,7 +27,12 @@ namespace Antilatency.Integration
         public Antilatency.HardwareExtensionInterface.IOutputPin outputPin6;
         public GameObject obj;
         public float range = 5f;
+       
 
+        
+        
+        private Alt.Tracking.ITrackingCotask _trackingCotask;
+        protected NodeHandle _trackingNode;
         private void Awake()
         {
             init();
@@ -60,14 +64,8 @@ namespace Antilatency.Integration
 
           
             var nw = GetNativeNetwork();
-            cotask = cotaskConstructor.startTask(nw, node); 
+            cotask = cotaskConstructor.startTask(nw, GetFirstIdleTrackerNode());
 
-        }
-
-
-        private void Start()
-        {
-       
             outputPin1 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO1, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
             outputPin2 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO2, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
             outputPin5 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO5, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
@@ -75,6 +73,8 @@ namespace Antilatency.Integration
 
             cotask.run();
         }
+
+
         void Update()
         {
 
@@ -123,6 +123,35 @@ namespace Antilatency.Integration
 
             return Network.NativeNetwork;
         }
+      
+        protected NodeHandle GetFirstIdleTrackerNode()
+        {
+            var nodes = GetIdleTrackerNodes();
+            if (nodes.Length == 0)
+            {
+                return new NodeHandle();
+            }
+            return nodes[0];
+        }
+        protected NodeHandle[] GetIdleTrackerNodes()
+        {
+            var nativeNetwork = GetNativeNetwork();
+
+            if (nativeNetwork == null)
+            {
+                return new NodeHandle[0];
+            }
+
+            using (var cotaskConstructor = library.getCotaskConstructor())
+            {
+                var nodes = cotaskConstructor.findSupportedNodes(nativeNetwork).Where(v =>
+                        nativeNetwork.nodeGetStatus(v) == NodeStatus.Idle
+                    ).ToArray();
+
+                return nodes;
+            }
+        }
+       
     }
-    
+   
 }

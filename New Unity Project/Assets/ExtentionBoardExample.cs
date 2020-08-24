@@ -27,10 +27,14 @@ namespace Antilatency.Integration
         public Antilatency.HardwareExtensionInterface.IOutputPin outputPin6;
         public GameObject obj;
         public float range = 5f;
+        public class BoolEvent : UnityEvent<bool> { }
+
+       
+       
        
 
-        
-        
+        protected Alt.Tracking.ILibrary _trackingLibrary;
+        protected UnityEngine.Pose _placement;
         private Alt.Tracking.ITrackingCotask _trackingCotask;
         protected NodeHandle _trackingNode;
         private void Awake()
@@ -123,7 +127,11 @@ namespace Antilatency.Integration
 
             return Network.NativeNetwork;
         }
-      
+       
+       
+
+        
+        
         protected NodeHandle GetFirstIdleTrackerNode()
         {
             var nodes = GetIdleTrackerNodes();
@@ -153,5 +161,5 @@ namespace Antilatency.Integration
         }
        
     }
-   
+
 }

@@ -60,7 +60,7 @@ namespace Antilatency.Integration
 
           
             var nw = GetNativeNetwork();
-            cotask = cotaskConstructor.startTask(nw, new NodeHandle()); 
+            cotask = cotaskConstructor.startTask(nw, node); 
 
         }
 

@@ -77,9 +77,9 @@ namespace Antilatency.Integration
                 outputPin5 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO5, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
                 outputPin6 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO6, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
 
-                
+                cotask.run();
             }
-            cotask.run();
+          
         }
 
 
@@ -167,18 +167,7 @@ namespace Antilatency.Integration
                 return nodes;
             }
         }
-       
-        public IEnumerator Test(IOutputPin output1, IOutputPin output2)
-        {
-
-            
-
-            Debug.Log("Output");
-            output1.setState(PinState.High);
-            output2.setState(PinState.High);
-
-            yield return new WaitForSeconds(0.1f);
-        }
+      
     }
 
 

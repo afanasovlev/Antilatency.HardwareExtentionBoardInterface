@@ -26,6 +26,10 @@ namespace Antilatency.Integration
         public Antilatency.HardwareExtensionInterface.IOutputPin outputPin2;
         public Antilatency.HardwareExtensionInterface.IOutputPin outputPin5;
         public Antilatency.HardwareExtensionInterface.IOutputPin outputPin6;
+        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin3;
+        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin4;
+        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin7;
+        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin8;
         public GameObject obj;
         public float range = 5f;
         public class BoolEvent : UnityEvent<bool> { }
@@ -69,23 +73,31 @@ namespace Antilatency.Integration
 
           
             var nw = GetNativeNetwork();
-            cotask = cotaskConstructor.startTask(nw, GetFirstIdleHardwareExtensionInterfaceNode());
+            node = GetFirstIdleHardwareExtensionInterfaceNode();
+            cotask = cotaskConstructor.startTask(nw, node);
             if (cotask != null)
             {
-                outputPin1 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO1, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
-                outputPin2 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO2, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
-                outputPin5 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO5, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
-                outputPin6 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO6, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
+                outputPin1 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO1, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
+                outputPin2 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO2, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
+                outputPin5 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO5, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
+                outputPin6 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO6, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
+                outputPin3 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IOA3, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
+                outputPin4 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IOA4, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
+                outputPin7 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO7, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
+                outputPin8 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO8, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
 
                 cotask.run();
             }
-          
+            
         }
 
 
         void Update()
         {
-
+            outputPin1.setState(PinState.Low);
+            outputPin2.setState(PinState.Low);
+            outputPin5.setState(PinState.Low);
+            outputPin6.setState(PinState.Low);
             float moveSpeed = 3f;
             float turnSpeed = 100f;
 
@@ -93,7 +105,7 @@ namespace Antilatency.Integration
             {
                 
                 outputPin2.setState(PinState.High);
-                outputPin6.setState(PinState.High);
+                //outputPin6.setState(PinState.High);
                 obj.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
 
             }
@@ -101,21 +113,21 @@ namespace Antilatency.Integration
             {
                 
                 outputPin1.setState(PinState.High);
-                outputPin5.setState(PinState.High);
+                //outputPin5.setState(PinState.High);
                 obj.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
             }
             if (Input.GetKey(KeyCode.LeftArrow))
             {
                 
                 outputPin2.setState(PinState.High);
-                outputPin5.setState(PinState.High);
+                //outputPin5.setState(PinState.High);
                 obj.transform.Rotate(Vector3.up * -turnSpeed * Time.deltaTime);
             }
             if (Input.GetKey(KeyCode.RightArrow))
             {
                 
                 outputPin1.setState(PinState.High);
-                outputPin6.setState(PinState.High);
+                //outputPin6.setState(PinState.High);
                 obj.transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime);
             }
         }
@@ -167,7 +179,27 @@ namespace Antilatency.Integration
                 return nodes;
             }
         }
-      
+
+
+
+
+
+
+
+
+
+       
+        public IEnumerator Test(IOutputPin output1, IOutputPin output2)
+        {
+
+            
+
+            Debug.Log("Output");
+            output1.setState(PinState.High);
+            output2.setState(PinState.High);
+
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 
 

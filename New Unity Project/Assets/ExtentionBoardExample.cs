@@ -6,6 +6,7 @@ using Antilatency.DeviceNetwork;
 
 using UnityEngine.Events;
 using System.Linq;
+using System.Collections;
 
 namespace Antilatency.Integration
 {
@@ -44,7 +45,7 @@ namespace Antilatency.Integration
 
         private void init()
         {
-            node = new NodeHandle(); 
+            //node = new NodeHandle(); 
 
             if (Network == null)
             {
@@ -68,13 +69,16 @@ namespace Antilatency.Integration
 
           
             var nw = GetNativeNetwork();
-            cotask = cotaskConstructor.startTask(nw, GetFirstIdleTrackerNode());
+            cotask = cotaskConstructor.startTask(nw, GetFirstIdleHardwareExtensionInterfaceNode());
+            if (cotask != null)
+            {
+                outputPin1 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO1, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
+                outputPin2 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO2, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
+                outputPin5 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO5, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
+                outputPin6 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO6, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
 
-            outputPin1 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO1, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
-            outputPin2 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO2, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
-            outputPin5 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO5, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
-            outputPin6 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO6, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
-
+                
+            }
             cotask.run();
         }
 
@@ -87,28 +91,32 @@ namespace Antilatency.Integration
 
             if (Input.GetKey(KeyCode.UpArrow))
             {
-                obj.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+                
                 outputPin2.setState(PinState.High);
                 outputPin6.setState(PinState.High);
+                obj.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
 
             }
             if (Input.GetKey(KeyCode.DownArrow))
             {
-                obj.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
+                
                 outputPin1.setState(PinState.High);
                 outputPin5.setState(PinState.High);
+                obj.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
             }
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                obj.transform.Rotate(Vector3.up * -turnSpeed * Time.deltaTime);
+                
                 outputPin2.setState(PinState.High);
                 outputPin5.setState(PinState.High);
+                obj.transform.Rotate(Vector3.up * -turnSpeed * Time.deltaTime);
             }
             if (Input.GetKey(KeyCode.RightArrow))
             {
-                obj.transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime);
+                
                 outputPin1.setState(PinState.High);
                 outputPin6.setState(PinState.High);
+                obj.transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime);
             }
         }
         public INetwork GetNativeNetwork()
@@ -132,16 +140,16 @@ namespace Antilatency.Integration
 
         
         
-        protected NodeHandle GetFirstIdleTrackerNode()
+        protected NodeHandle GetFirstIdleHardwareExtensionInterfaceNode()
         {
-            var nodes = GetIdleTrackerNodes();
+            var nodes = GetFirstIdleHardwareExtensionInterfaceNodes();
             if (nodes.Length == 0)
             {
                 return new NodeHandle();
             }
             return nodes[0];
         }
-        protected NodeHandle[] GetIdleTrackerNodes()
+        protected NodeHandle[] GetFirstIdleHardwareExtensionInterfaceNodes()
         {
             var nativeNetwork = GetNativeNetwork();
 
@@ -160,6 +168,18 @@ namespace Antilatency.Integration
             }
         }
        
+        public IEnumerator Test(IOutputPin output1, IOutputPin output2)
+        {
+
+            
+
+            Debug.Log("Output");
+            output1.setState(PinState.High);
+            output2.setState(PinState.High);
+
+            yield return new WaitForSeconds(0.1f);
+        }
     }
+
 
 }

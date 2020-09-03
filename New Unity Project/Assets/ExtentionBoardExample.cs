@@ -1,4 +1,4 @@
-﻿//version 31.08.2020 23 30
+//version 31.08.2020 23 30
 using System;
 using UnityEngine;
 using Antilatency.HardwareExtensionInterface.Interop;
@@ -13,7 +13,7 @@ namespace Antilatency.Integration
 {
     public class ExtentionBoardExample : MonoBehaviour
     {
-        
+        public string SoketTag;
         public DeviceNetwork Network;
         public Antilatency.DeviceNetwork.ILibrary dLibrary;
         public Antilatency.DeviceNetwork.INetwork inetwork;
@@ -35,9 +35,9 @@ namespace Antilatency.Integration
         public float range = 5f;
         public class BoolEvent : UnityEvent<bool> { }
 
-       
-       
-       
+
+
+
 
         protected Alt.Tracking.ILibrary _trackingLibrary;
         protected UnityEngine.Pose _placement;
@@ -72,65 +72,91 @@ namespace Antilatency.Integration
 
             cotaskConstructor = library.getCotaskConstructor();
 
-          
+
             var nw = GetNativeNetwork();
-            node = GetFirstIdleHardwareExtensionInterfaceNode();
-            cotask = cotaskConstructor.startTask(nw, node);
+            
+            var nodeTr = GetFirstIdleTrackerNodeBySocketTag(SoketTag);
+            cotask = cotaskConstructor.startTask(nw, nodeTr);
             if (cotask != null)
             {
-                outputPin1 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO1, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
-                outputPin2 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO2, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
-                outputPin5 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO5, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
-                outputPin6 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO6, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
-               outputPin3 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IOA3, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
-                outputPin4 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IOA4, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
-                outputPin7 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO7, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
-               outputPin8 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO8, Antilatency.HardwareExtensionInterface.Interop.PinState.High);
+                outputPin1 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO1, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
+                outputPin2 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO2, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
+                outputPin5 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO5, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
+                outputPin6 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO6, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
 
                 cotask.run();
             }
-            
+
         }
 
 
         void Update()
         {
-            outputPin1.setState(PinState.Low);
-            outputPin2.setState(PinState.Low);
-            outputPin5.setState(PinState.Low);
-            outputPin6.setState(PinState.Low);
+
             float moveSpeed = 3f;
             float turnSpeed = 100f;
 
             if (Input.GetKey(KeyCode.UpArrow))
             {
-                
-                outputPin2.setState(PinState.High);
-                //outputPin6.setState(PinState.High);
+
+                Forward();
                 obj.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
 
+
+            }
+            if (Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
+            {
+                Stop();
             }
             if (Input.GetKey(KeyCode.DownArrow))
             {
-                
-                outputPin1.setState(PinState.High);
-                //outputPin5.setState(PinState.High);
+                Back();
                 obj.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
             }
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                
-                outputPin2.setState(PinState.High);
-                //outputPin5.setState(PinState.High);
+
+                Left();
                 obj.transform.Rotate(Vector3.up * -turnSpeed * Time.deltaTime);
             }
             if (Input.GetKey(KeyCode.RightArrow))
             {
-                
-                outputPin1.setState(PinState.High);
-                //outputPin6.setState(PinState.High);
+
+                Right();
                 obj.transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime);
             }
+        }
+
+       private void Forward()
+        {
+            outputPin2.setState(PinState.High);
+            outputPin6.setState(PinState.High);
+        }
+
+        private void Back()
+        {
+            outputPin1.setState(PinState.High);
+            outputPin5.setState(PinState.High);
+        }
+
+        private void Left()
+        {
+            outputPin1.setState(PinState.High);
+            outputPin6.setState(PinState.High);
+        }
+
+        private void Right()
+        {
+            outputPin2.setState(PinState.High);
+            outputPin5.setState(PinState.High);
+            
+        }
+        private void Stop()
+        {
+            outputPin1.setState(PinState.Low);
+            outputPin2.setState(PinState.Low);
+            outputPin5.setState(PinState.Low);
+            outputPin6.setState(PinState.Low);
         }
         public INetwork GetNativeNetwork()
         {
@@ -149,10 +175,6 @@ namespace Antilatency.Integration
             return Network.NativeNetwork;
         }
        
-       
-
-        
-        
         protected NodeHandle GetFirstIdleHardwareExtensionInterfaceNode()
         {
             var nodes = GetFirstIdleHardwareExtensionInterfaceNodes();
@@ -180,21 +202,40 @@ namespace Antilatency.Integration
                 return nodes;
             }
         }
+        protected NodeHandle[] GetIdleTrackerNodesBySocketTag(string socketTag)
+        {
+            var nativeNetwork = GetNativeNetwork();
 
+            if (nativeNetwork == null)
+            {
+                return new NodeHandle[0];
+            }
 
+            using (var cotaskConstructor = library.getCotaskConstructor())
+            {
+                var nodes = cotaskConstructor.findSupportedNodes(nativeNetwork).Where(v =>
+                        nativeNetwork.nodeGetStringProperty(nativeNetwork.nodeGetParent(v), "Tag") == socketTag &&
+                        nativeNetwork.nodeGetStatus(v) == NodeStatus.Idle
+                        ).ToArray();
 
+                return nodes;
+            }
+        }
 
+        protected NodeHandle GetFirstIdleTrackerNodeBySocketTag(string socketTag)
+        {
+            var nodes = GetIdleTrackerNodesBySocketTag(socketTag);
 
+            if (nodes.Length == 0)
+            {
+                return new NodeHandle();
+            }
 
-
-
-
-       
+            return nodes[0];
+        }
         public IEnumerator Test(IOutputPin output1, IOutputPin output2)
         {
-
-            
-
+    
             Debug.Log("Output");
             output1.setState(PinState.High);
             output2.setState(PinState.High);

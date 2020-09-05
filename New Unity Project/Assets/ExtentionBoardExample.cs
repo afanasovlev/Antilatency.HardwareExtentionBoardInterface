@@ -1,4 +1,4 @@
-//version 31.08.2020 23 30
+//version 5.09.2020 9:18
 using System;
 using UnityEngine;
 using Antilatency.HardwareExtensionInterface.Interop;
@@ -29,8 +29,8 @@ namespace Antilatency.Integration
         public Antilatency.HardwareExtensionInterface.IOutputPin outputPin6;
         public Antilatency.HardwareExtensionInterface.IOutputPin outputPin3;
         public Antilatency.HardwareExtensionInterface.IOutputPin outputPin4;
-        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin7;
-        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin8;
+        public Antilatency.HardwareExtensionInterface.IPwmPin pwmPin7;
+        public Antilatency.HardwareExtensionInterface.IPwmPin pwmPin8;
         public GameObject obj;
         public float range = 5f;
         public class BoolEvent : UnityEvent<bool> { }
@@ -43,6 +43,7 @@ namespace Antilatency.Integration
         protected UnityEngine.Pose _placement;
         private Alt.Tracking.ITrackingCotask _trackingCotask;
         protected NodeHandle _trackingNode;
+
         private void Awake()
         {
             init();
@@ -74,15 +75,19 @@ namespace Antilatency.Integration
 
 
             var nw = GetNativeNetwork();
-            
-            var nodeTr = GetFirstIdleTrackerNodeBySocketTag(SoketTag);
-            cotask = cotaskConstructor.startTask(nw, nodeTr);
+            // var nodeTr = GetFirstIdleTrackerNodeBySocketTag(SoketTag);
+            var node = WaitForNode();
+
+            cotask = cotaskConstructor.startTask(nw, node);
+
             if (cotask != null)
             {
                 outputPin1 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO1, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
                 outputPin2 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO2, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
                 outputPin5 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO5, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
                 outputPin6 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO6, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
+                pwmPin7 = cotask.createPwmPin(Pins.IO7, 10000, 0.0f);
+                pwmPin8 = cotask.createPwmPin(Pins.IO8, 10000, 0.0f);
 
                 cotask.run();
             }
@@ -92,64 +97,63 @@ namespace Antilatency.Integration
 
         void Update()
         {
-
+           
             float moveSpeed = 3f;
             float turnSpeed = 100f;
 
             if (Input.GetKey(KeyCode.UpArrow))
             {
-
                 Forward();
                 obj.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
-
-
             }
-            if (Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
-            {
-                Stop();
-            }
+
             if (Input.GetKey(KeyCode.DownArrow))
             {
                 Back();
                 obj.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
             }
+
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-
                 Left();
                 obj.transform.Rotate(Vector3.up * -turnSpeed * Time.deltaTime);
             }
+
             if (Input.GetKey(KeyCode.RightArrow))
             {
-
                 Right();
                 obj.transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime);
             }
+
+            if (Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
+            {
+                Stop();
+            }
         }
 
-       private void Forward()
+        private void Forward()
         {
+            IncreaseSpeed();
             outputPin2.setState(PinState.High);
             outputPin6.setState(PinState.High);
         }
-
         private void Back()
         {
+            IncreaseSpeed();
             outputPin1.setState(PinState.High);
             outputPin5.setState(PinState.High);
         }
-
         private void Left()
         {
+            IncreaseSpeed();
             outputPin1.setState(PinState.High);
             outputPin6.setState(PinState.High);
         }
-
         private void Right()
         {
+            IncreaseSpeed();
             outputPin2.setState(PinState.High);
             outputPin5.setState(PinState.High);
-            
         }
         private void Stop()
         {
@@ -157,6 +161,25 @@ namespace Antilatency.Integration
             outputPin2.setState(PinState.Low);
             outputPin5.setState(PinState.Low);
             outputPin6.setState(PinState.Low);
+        }
+
+        private void IncreaseSpeed()
+        {
+            float timeToIncrease = 0.2f;
+
+            float startTime;
+            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
+            //if (Input.GetButton("Horizontal"))
+            {
+                startTime = Time.time;
+                if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)  && Time.time - startTime > timeToIncrease)
+                //if (Input.GetButton("Horizontal") && Time.time - startTime > timeToIncrease)
+                {
+                    pwmPin7.setDuty(pwmPin7.getDuty() + 0.2f);
+                    pwmPin8.setDuty(pwmPin8.getDuty() + 0.2f);
+                    Debug.Log((Time.time - startTime).ToString("00:00.00"));
+                }
+            }
         }
         public INetwork GetNativeNetwork()
         {
@@ -202,7 +225,7 @@ namespace Antilatency.Integration
                 return nodes;
             }
         }
-        protected NodeHandle[] GetIdleTrackerNodesBySocketTag(string socketTag)
+        protected NodeHandle[] GetIdleNodesBySocketTag(string socketTag)
         {
             var nativeNetwork = GetNativeNetwork();
 
@@ -213,8 +236,9 @@ namespace Antilatency.Integration
 
             using (var cotaskConstructor = library.getCotaskConstructor())
             {
+
                 var nodes = cotaskConstructor.findSupportedNodes(nativeNetwork).Where(v =>
-                        nativeNetwork.nodeGetStringProperty(nativeNetwork.nodeGetParent(v), "Tag") == socketTag &&
+                        nativeNetwork.nodeGetStringProperty(v, "Tag") == socketTag &&
                         nativeNetwork.nodeGetStatus(v) == NodeStatus.Idle
                         ).ToArray();
 
@@ -222,7 +246,7 @@ namespace Antilatency.Integration
             }
         }
 
-        protected NodeHandle GetFirstIdleTrackerNodeBySocketTag(string socketTag)
+        protected NodeHandle GetFirstIdleNodeBySocketTag(string socketTag)
         {
             var nodes = GetIdleTrackerNodesBySocketTag(socketTag);
 
@@ -233,14 +257,35 @@ namespace Antilatency.Integration
 
             return nodes[0];
         }
-        public IEnumerator Test(IOutputPin output1, IOutputPin output2)
+        public Antilatency.DeviceNetwork.NodeHandle WaitForNode()
         {
-    
-            Debug.Log("Output");
-            output1.setState(PinState.High);
-            output2.setState(PinState.High);
+            Console.WriteLine("Waiting for tracking node...");
 
-            yield return new WaitForSeconds(0.1f);
+            var node = new NodeHandle();
+            var networkUpdateId = 0u;
+            do
+            {
+                inetwork = GetNativeNetwork();
+
+                var updateId = inetwork.getUpdateId();
+                if (networkUpdateId != updateId)
+                {
+                    networkUpdateId = updateId;
+
+                    Console.WriteLine("Network update id has been incremented, searching for available tracking node...");
+
+                    node = GetFirstIdleNodeBySocketTag(SoketTag);
+
+                    if (node == Antilatency.DeviceNetwork.NodeHandle.Null)
+                    {
+                        Console.WriteLine("Tracking node not found.");
+                    }
+                }
+            } while (node == Antilatency.DeviceNetwork.NodeHandle.Null);
+
+            Console.WriteLine("Tracking node found, serial number: " + inetwork.nodeGetStringProperty(node, Antilatency.DeviceNetwork.Interop.Constants.HardwareSerialNumberKey));
+
+            return node;
         }
     }
 

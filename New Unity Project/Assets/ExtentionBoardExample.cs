@@ -161,6 +161,8 @@ namespace Antilatency.Integration
             outputPin2.setState(PinState.Low);
             outputPin5.setState(PinState.Low);
             outputPin6.setState(PinState.Low);
+            pwmPin7.setDuty(0.0f);
+            pwmPin8.setDuty(0.0f);
         }
 
         private void IncreaseSpeed()

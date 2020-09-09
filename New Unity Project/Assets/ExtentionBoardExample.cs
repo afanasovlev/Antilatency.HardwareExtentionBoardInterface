@@ -1,4 +1,4 @@
-//version 5.09.2020 9:18
+//version 9.09.2020 
 using System;
 using UnityEngine;
 using Antilatency.HardwareExtensionInterface.Interop;
@@ -37,9 +37,9 @@ namespace Antilatency.Integration
 
 
 
+        private Antilatency.StorageClient.ILibrary _antilatencyStorageClientLibrary;
 
-
-        protected Alt.Tracking.ILibrary _trackingLibrary;
+        protected Alt.Tracking.ILibrary _altTrackingLibrary;
         protected UnityEngine.Pose _placement;
         private Alt.Tracking.ITrackingCotask _trackingCotask;
         protected NodeHandle _trackingNode;
@@ -51,7 +51,6 @@ namespace Antilatency.Integration
 
         private void init()
         {
-            //node = new NodeHandle(); 
 
             if (Network == null)
             {
@@ -60,7 +59,7 @@ namespace Antilatency.Integration
             }
             dLibrary = Antilatency.DeviceNetwork.Library.load();
             library = Antilatency.HardwareExtensionInterface.Library.load();
-
+          
             if (library == null)
             {
                 Debug.LogError("HW Lib is null");
@@ -69,10 +68,11 @@ namespace Antilatency.Integration
             {
                 Debug.LogError("DN Lib is null");
             }
+           
+
             dLibrary.setLogLevel(LogLevel.Info);
 
             cotaskConstructor = library.getCotaskConstructor();
-
 
             var nw = GetNativeNetwork();
             // var nodeTr = GetFirstIdleTrackerNodeBySocketTag(SoketTag);
@@ -92,6 +92,7 @@ namespace Antilatency.Integration
                 cotask.run();
             }
 
+   
         }
 
 
@@ -167,21 +168,23 @@ namespace Antilatency.Integration
 
         private void IncreaseSpeed()
         {
-            float timeToIncrease = 0.2f;
+            pwmPin7.setDuty(pwmPin7.getDuty() + 0.5f);
+            pwmPin8.setDuty(pwmPin8.getDuty() + 0.5f);
+            //float timeToIncrease = 0.2f;
 
-            float startTime;
-            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
+            // float startTime;
+            // if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
             //if (Input.GetButton("Horizontal"))
-            {
-                startTime = Time.time;
-                if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)  && Time.time - startTime > timeToIncrease)
-                //if (Input.GetButton("Horizontal") && Time.time - startTime > timeToIncrease)
-                {
-                    pwmPin7.setDuty(pwmPin7.getDuty() + 0.2f);
+            //{
+            //startTime = Time.time;
+            //if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)  && Time.time - startTime > timeToIncrease)
+            //if (Input.GetButton("Horizontal") && Time.time - startTime > timeToIncrease)
+            //{
+            pwmPin7.setDuty(pwmPin7.getDuty() + 0.2f);
                     pwmPin8.setDuty(pwmPin8.getDuty() + 0.2f);
-                    Debug.Log((Time.time - startTime).ToString("00:00.00"));
-                }
-            }
+                    //Debug.Log((Time.time - startTime).ToString("00:00.00"));
+                //}
+            //}
         }
         public INetwork GetNativeNetwork()
         {
@@ -250,7 +253,7 @@ namespace Antilatency.Integration
 
         protected NodeHandle GetFirstIdleNodeBySocketTag(string socketTag)
         {
-            var nodes = GetIdleTrackerNodesBySocketTag(socketTag);
+            var nodes = GetIdleNodesBySocketTag(socketTag);
 
             if (nodes.Length == 0)
             {

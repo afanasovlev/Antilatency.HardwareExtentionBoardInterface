@@ -1,4 +1,4 @@
-//version 9.09.2020 
+//version 31.08.2020 23 30
 using System;
 using UnityEngine;
 using Antilatency.HardwareExtensionInterface.Interop;
@@ -15,34 +15,22 @@ namespace Antilatency.Integration
     {
         public string SoketTag;
         public DeviceNetwork Network;
-        public Antilatency.DeviceNetwork.ILibrary dLibrary;
-        public Antilatency.DeviceNetwork.INetwork inetwork;
-        public Antilatency.DeviceNetwork.NodeHandle node;
+        private Antilatency.DeviceNetwork.ILibrary dLibrary;
+        private Antilatency.DeviceNetwork.INetwork inetwork;
+        private Antilatency.DeviceNetwork.NodeHandle node;
 
-        public Antilatency.HardwareExtensionInterface.ILibrary library;
-        public Antilatency.HardwareExtensionInterface.ICotask cotask;
-        public Antilatency.HardwareExtensionInterface.ICotaskConstructor cotaskConstructor;
+        private Antilatency.HardwareExtensionInterface.ILibrary library;
+        private Antilatency.HardwareExtensionInterface.ICotask cotask;
+        private Antilatency.HardwareExtensionInterface.ICotaskConstructor cotaskConstructor;
 
-        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin1;
-        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin2;
-        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin5;
-        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin6;
-        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin3;
-        public Antilatency.HardwareExtensionInterface.IOutputPin outputPin4;
-        public Antilatency.HardwareExtensionInterface.IPwmPin pwmPin7;
-        public Antilatency.HardwareExtensionInterface.IPwmPin pwmPin8;
+        private Antilatency.HardwareExtensionInterface.IPwmPin pwmPin1;
+        private Antilatency.HardwareExtensionInterface.IPwmPin pwmPin2;
+        private Antilatency.HardwareExtensionInterface.IPwmPin pwmPin5;
+        private Antilatency.HardwareExtensionInterface.IPwmPin pwmPin6;
+        
         public GameObject obj;
         public float range = 5f;
-        public class BoolEvent : UnityEvent<bool> { }
-
-
-
-        private Antilatency.StorageClient.ILibrary _antilatencyStorageClientLibrary;
-
-        protected Alt.Tracking.ILibrary _altTrackingLibrary;
-        protected UnityEngine.Pose _placement;
-        private Alt.Tracking.ITrackingCotask _trackingCotask;
-        protected NodeHandle _trackingNode;
+      
 
         private void Awake()
         {
@@ -68,31 +56,26 @@ namespace Antilatency.Integration
             {
                 Debug.LogError("DN Lib is null");
             }
-           
-
+      
             dLibrary.setLogLevel(LogLevel.Info);
 
             cotaskConstructor = library.getCotaskConstructor();
 
             var nw = GetNativeNetwork();
-            // var nodeTr = GetFirstIdleTrackerNodeBySocketTag(SoketTag);
+            
             var node = WaitForNode();
 
             cotask = cotaskConstructor.startTask(nw, node);
 
             if (cotask != null)
             {
-                outputPin1 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO1, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
-                outputPin2 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO2, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
-                outputPin5 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO5, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
-                outputPin6 = cotask.createOutputPin(Antilatency.HardwareExtensionInterface.Interop.Pins.IO6, Antilatency.HardwareExtensionInterface.Interop.PinState.Low);
-                pwmPin7 = cotask.createPwmPin(Pins.IO7, 10000, 0.0f);
-                pwmPin8 = cotask.createPwmPin(Pins.IO8, 10000, 0.0f);
-
+                pwmPin1 = cotask.createPwmPin(Pins.IO1, 10000, 0.0f);
+                pwmPin2 = cotask.createPwmPin(Pins.IO2, 10000, 0.0f);
+                pwmPin5 = cotask.createPwmPin(Pins.IO5, 10000, 0.0f);
+                pwmPin6 = cotask.createPwmPin(Pins.IO6, 10000, 0.0f);
+              
                 cotask.run();
             }
-
-   
         }
 
 
@@ -134,57 +117,32 @@ namespace Antilatency.Integration
 
         private void Forward()
         {
-            IncreaseSpeed();
-            outputPin2.setState(PinState.High);
-            outputPin6.setState(PinState.High);
+            IncreaseSpeed(pwmPin2, pwmPin6, 0.7f, 0.86f);
         }
         private void Back()
         {
-            IncreaseSpeed();
-            outputPin1.setState(PinState.High);
-            outputPin5.setState(PinState.High);
+            IncreaseSpeed(pwmPin1, pwmPin5, 0.7f, 0.84f);
         }
         private void Left()
         {
-            IncreaseSpeed();
-            outputPin1.setState(PinState.High);
-            outputPin6.setState(PinState.High);
+            IncreaseSpeed(pwmPin1, pwmPin6, 0.8f, 0.75f);
         }
         private void Right()
         {
-            IncreaseSpeed();
-            outputPin2.setState(PinState.High);
-            outputPin5.setState(PinState.High);
+            IncreaseSpeed(pwmPin2, pwmPin5, 0.8f, 0.75f);        
         }
         private void Stop()
         {
-            outputPin1.setState(PinState.Low);
-            outputPin2.setState(PinState.Low);
-            outputPin5.setState(PinState.Low);
-            outputPin6.setState(PinState.Low);
-            pwmPin7.setDuty(0.0f);
-            pwmPin8.setDuty(0.0f);
+            pwmPin1.setDuty(0.0f);
+            pwmPin2.setDuty(0.0f);
+            pwmPin5.setDuty(0.0f);
+            pwmPin6.setDuty(0.0f);
         }
 
-        private void IncreaseSpeed()
+        private void IncreaseSpeed(IPwmPin pin1, IPwmPin pin2, float one, float two)
         {
-            pwmPin7.setDuty(pwmPin7.getDuty() + 0.5f);
-            pwmPin8.setDuty(pwmPin8.getDuty() + 0.5f);
-            //float timeToIncrease = 0.2f;
-
-            // float startTime;
-            // if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
-            //if (Input.GetButton("Horizontal"))
-            //{
-            //startTime = Time.time;
-            //if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)  && Time.time - startTime > timeToIncrease)
-            //if (Input.GetButton("Horizontal") && Time.time - startTime > timeToIncrease)
-            //{
-            //pwmPin7.setDuty(pwmPin7.getDuty() + 0.2f);
-                    //pwmPin8.setDuty(pwmPin8.getDuty() + 0.2f);
-                    //Debug.Log((Time.time - startTime).ToString("00:00.00"));
-                //}
-            //}
+            pin1.setDuty(one);
+            pin2.setDuty(two);         
         }
         public INetwork GetNativeNetwork()
         {

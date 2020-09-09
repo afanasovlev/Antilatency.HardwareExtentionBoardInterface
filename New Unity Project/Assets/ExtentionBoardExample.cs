@@ -180,8 +180,8 @@ namespace Antilatency.Integration
             //if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)  && Time.time - startTime > timeToIncrease)
             //if (Input.GetButton("Horizontal") && Time.time - startTime > timeToIncrease)
             //{
-            pwmPin7.setDuty(pwmPin7.getDuty() + 0.2f);
-                    pwmPin8.setDuty(pwmPin8.getDuty() + 0.2f);
+            //pwmPin7.setDuty(pwmPin7.getDuty() + 0.2f);
+                    //pwmPin8.setDuty(pwmPin8.getDuty() + 0.2f);
                     //Debug.Log((Time.time - startTime).ToString("00:00.00"));
                 //}
             //}

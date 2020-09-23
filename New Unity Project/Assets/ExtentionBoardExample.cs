@@ -23,14 +23,10 @@ namespace Antilatency.Integration
         private Antilatency.HardwareExtensionInterface.ICotask cotask;
         private Antilatency.HardwareExtensionInterface.ICotaskConstructor cotaskConstructor;
 
-        private Antilatency.HardwareExtensionInterface.IPwmPin pwmPin1;
-        private Antilatency.HardwareExtensionInterface.IPwmPin pwmPin2;
-        private Antilatency.HardwareExtensionInterface.IPwmPin pwmPin5;
-        private Antilatency.HardwareExtensionInterface.IPwmPin pwmPin6;
-        
+       
         public GameObject obj;
         public float range = 5f;
-      
+
 
         private void Awake()
         {
@@ -47,7 +43,7 @@ namespace Antilatency.Integration
             }
             dLibrary = Antilatency.DeviceNetwork.Library.load();
             library = Antilatency.HardwareExtensionInterface.Library.load();
-          
+
             if (library == null)
             {
                 Debug.LogError("HW Lib is null");
@@ -56,24 +52,24 @@ namespace Antilatency.Integration
             {
                 Debug.LogError("DN Lib is null");
             }
-      
+
             dLibrary.setLogLevel(LogLevel.Info);
 
             cotaskConstructor = library.getCotaskConstructor();
 
             var nw = GetNativeNetwork();
-            
+
             var node = WaitForNode();
 
             cotask = cotaskConstructor.startTask(nw, node);
 
             if (cotask != null)
             {
-                pwmPin1 = cotask.createPwmPin(Pins.IO1, 10000, 0.0f);
-                pwmPin2 = cotask.createPwmPin(Pins.IO2, 10000, 0.0f);
-                pwmPin5 = cotask.createPwmPin(Pins.IO5, 10000, 0.0f);
-                pwmPin6 = cotask.createPwmPin(Pins.IO6, 10000, 0.0f);
-              
+                Controller.pwmPin1 = cotask.createPwmPin(Pins.IO1, 10000, 0.0f);
+                Controller.pwmPin2 = cotask.createPwmPin(Pins.IO2, 10000, 0.0f);
+                Controller.pwmPin5 = cotask.createPwmPin(Pins.IO5, 10000, 0.0f);
+                Controller.pwmPin6 = cotask.createPwmPin(Pins.IO6, 10000, 0.0f);
+                
                 cotask.run();
             }
         }
@@ -81,69 +77,41 @@ namespace Antilatency.Integration
 
         void Update()
         {
-           
+
             float moveSpeed = 3f;
             float turnSpeed = 100f;
 
             if (Input.GetKey(KeyCode.UpArrow))
             {
-                Forward();
+                Controller.Forward();
                 obj.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(KeyCode.DownArrow))
             {
-                Back();
+                Controller.Back();
                 obj.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                Left();
+                Controller.Left();
                 obj.transform.Rotate(Vector3.up * -turnSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(KeyCode.RightArrow))
             {
-                Right();
+                Controller.Right();
                 obj.transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime);
             }
 
             if (Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
             {
-                Stop();
+                Controller.Stop();
             }
         }
 
-        private void Forward()
-        {
-            IncreaseSpeed(pwmPin2, pwmPin6, 0.7f, 0.86f);
-        }
-        private void Back()
-        {
-            IncreaseSpeed(pwmPin1, pwmPin5, 0.7f, 0.84f);
-        }
-        private void Left()
-        {
-            IncreaseSpeed(pwmPin1, pwmPin6, 0.8f, 0.75f);
-        }
-        private void Right()
-        {
-            IncreaseSpeed(pwmPin2, pwmPin5, 0.8f, 0.75f);        
-        }
-        private void Stop()
-        {
-            pwmPin1.setDuty(0.0f);
-            pwmPin2.setDuty(0.0f);
-            pwmPin5.setDuty(0.0f);
-            pwmPin6.setDuty(0.0f);
-        }
-
-        private void IncreaseSpeed(IPwmPin pin1, IPwmPin pin2, float one, float two)
-        {
-            pin1.setDuty(one);
-            pin2.setDuty(two);         
-        }
+        
         public INetwork GetNativeNetwork()
         {
             if (Network == null)
@@ -160,7 +128,7 @@ namespace Antilatency.Integration
 
             return Network.NativeNetwork;
         }
-       
+
         protected NodeHandle GetFirstIdleHardwareExtensionInterfaceNode()
         {
             var nodes = GetFirstIdleHardwareExtensionInterfaceNodes();
@@ -252,5 +220,42 @@ namespace Antilatency.Integration
         }
     }
 
+    public class Controller
+    {
+        public static Antilatency.HardwareExtensionInterface.IPwmPin pwmPin1;
+        public static Antilatency.HardwareExtensionInterface.IPwmPin pwmPin2;
+        public static Antilatency.HardwareExtensionInterface.IPwmPin pwmPin5;
+        public static Antilatency.HardwareExtensionInterface.IPwmPin pwmPin6;
 
+        public static void Forward()
+        {
+            IncreaseSpeed(pwmPin2, pwmPin6, 0.7f, 0.86f);
+        }
+        public static void Back()
+        {
+            IncreaseSpeed(pwmPin1, pwmPin5, 0.7f, 0.84f);
+        }
+        public static void Left()
+        {
+            IncreaseSpeed(pwmPin1, pwmPin6, 0.8f, 0.75f);
+        }
+        public static void Right()
+        {
+            IncreaseSpeed(pwmPin2, pwmPin5, 0.8f, 0.75f);
+        }
+        public static void Stop()
+        {
+            pwmPin1.setDuty(0.0f);
+            pwmPin2.setDuty(0.0f);
+            pwmPin5.setDuty(0.0f);
+            pwmPin6.setDuty(0.0f);
+        }
+
+        public static void IncreaseSpeed(IPwmPin pin1, IPwmPin pin2, float one, float two)
+        {
+            pin1.setDuty(one);
+            pin2.setDuty(two);
+        }
+
+    }
 }

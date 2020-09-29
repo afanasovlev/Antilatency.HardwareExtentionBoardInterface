@@ -1,13 +1,11 @@
-//version 23.09.2020 15:06
+//version 29.09.2020 10:23
+// add slow turn right and left
 using System;
-using UnityEngine;
-using Antilatency.HardwareExtensionInterface.Interop;
-using Antilatency.HardwareExtensionInterface;
-using Antilatency.DeviceNetwork;
-
-using UnityEngine.Events;
 using System.Linq;
-using System.Collections;
+using Antilatency.DeviceNetwork;
+using Antilatency.HardwareExtensionInterface;
+using Antilatency.HardwareExtensionInterface.Interop;
+using UnityEngine;
 
 namespace Antilatency.Integration
 {
@@ -65,10 +63,10 @@ namespace Antilatency.Integration
 
             if (cotask != null)
             {
-                Controller.pwmPin1 = cotask.createPwmPin(Pins.IO1, 10000, 0.0f);
-                Controller.pwmPin2 = cotask.createPwmPin(Pins.IO2, 10000, 0.0f);
-                Controller.pwmPin5 = cotask.createPwmPin(Pins.IO5, 10000, 0.0f);
-                Controller.pwmPin6 = cotask.createPwmPin(Pins.IO6, 10000, 0.0f);
+                Controller.lBack = cotask.createPwmPin(Pins.IO1, 10000, 0.0f);
+                Controller.lForw = cotask.createPwmPin(Pins.IO2, 10000, 0.0f);
+                Controller.rBack = cotask.createPwmPin(Pins.IO5, 10000, 0.0f);
+                Controller.rForw = cotask.createPwmPin(Pins.IO6, 10000, 0.0f);
                 
                 cotask.run();
             }
@@ -109,6 +107,28 @@ namespace Antilatency.Integration
             {
                 Controller.Stop();
             }
+
+            if (Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.LeftArrow))
+            {
+                Controller.FLeft();
+            }
+
+            if (Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.RightArrow))
+            {
+                Controller.FRight();
+            }
+
+            if (Input.GetKey(KeyCode.DownArrow) && Input.GetKey(KeyCode.LeftArrow))
+            {
+                Controller.BLeft();
+            }
+
+            if (Input.GetKey(KeyCode.DownArrow) && Input.GetKey(KeyCode.RightArrow))
+            {
+                Controller.BRight();
+            }
+
+
         }
 
         
@@ -222,33 +242,51 @@ namespace Antilatency.Integration
 
     public class Controller
     {
-        public static Antilatency.HardwareExtensionInterface.IPwmPin pwmPin1;
-        public static Antilatency.HardwareExtensionInterface.IPwmPin pwmPin2;
-        public static Antilatency.HardwareExtensionInterface.IPwmPin pwmPin5;
-        public static Antilatency.HardwareExtensionInterface.IPwmPin pwmPin6;
+        public static Antilatency.HardwareExtensionInterface.IPwmPin lBack; //pwm1
+        public static Antilatency.HardwareExtensionInterface.IPwmPin lForw; //pwn2
+        public static Antilatency.HardwareExtensionInterface.IPwmPin rBack; //pwm5
+        public static Antilatency.HardwareExtensionInterface.IPwmPin rForw; //pwm6
 
         public static void Forward()
         {
-            IncreaseSpeed(pwmPin2, pwmPin6, 0.7f, 0.86f);
+            IncreaseSpeed(lForw, rForw, 0.7f, 0.86f);
         }
         public static void Back()
         {
-            IncreaseSpeed(pwmPin1, pwmPin5, 0.7f, 0.84f);
+            IncreaseSpeed(lBack, rBack, 0.7f, 0.84f);
         }
         public static void Left()
         {
-            IncreaseSpeed(pwmPin1, pwmPin6, 0.8f, 0.75f);
+            IncreaseSpeed(lBack, rForw, 0.8f, 0.75f);
         }
         public static void Right()
         {
-            IncreaseSpeed(pwmPin2, pwmPin5, 0.8f, 0.75f);
+            IncreaseSpeed(lForw, rBack, 0.8f, 0.75f);
         }
+        public static void FRight()
+        {
+            IncreaseSpeed(lForw, rForw, 1.0f, 0.6f);
+        }
+        public static void FLeft()
+        {
+            IncreaseSpeed(lForw, rForw, 0.6f, 1.0f);
+        }
+
+        public static void BRight()
+        {
+            IncreaseSpeed(lBack, rBack, 0.6f, 1.0f);
+        }
+        public static void BLeft()
+        {
+            IncreaseSpeed(lBack, rBack, 1.0f, 0.6f);
+        }
+
         public static void Stop()
         {
-            pwmPin1.setDuty(0.0f);
-            pwmPin2.setDuty(0.0f);
-            pwmPin5.setDuty(0.0f);
-            pwmPin6.setDuty(0.0f);
+            lBack.setDuty(0.0f);
+            lForw.setDuty(0.0f);
+            rBack.setDuty(0.0f);
+            rForw.setDuty(0.0f);
         }
 
         public static void IncreaseSpeed(IPwmPin pin1, IPwmPin pin2, float one, float two)
